@@ -16,13 +16,3 @@ class BankAccount:
 
     def display_balance(self):
         print(f'The balance of the account owned by {self.owner} is {self.balance}.')
-
-
-account = BankAccount('Asta')
-
-
-account.display_balance()
-account.deposit(500)
-account.withdraw(200)
-account.withdraw(2000)
-account.display_balance()
