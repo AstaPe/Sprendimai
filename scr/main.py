@@ -1,6 +1,7 @@
 from scr.classes.bankaccount import BankAccount
 from scr.classes.car import Car
 from scr.classes.cat import Cat
+from scr.classes.rectangle import Rectangle
 
 car1 = Car('Toyota', 'Red')
 car2 = Car('Honda', 'Blue')
@@ -29,5 +30,10 @@ cat5 = Cat('K')
 cat6 = Cat('L')
 
 
-# Print the total number of Cat instances created
 print(f'Total number of cats: {Cat.total_cats}')
+
+# ketvirta uzduotis
+rectangle = Rectangle(10, 5)
+
+print(f'Rectangle area: {rectangle.get_area()}')
+print(f'Rectangle perimeter: {rectangle.get_perimeter()}')
