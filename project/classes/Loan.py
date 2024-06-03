@@ -9,9 +9,10 @@ class Loan:
     def calculate_monthly_payment(self):
         rate = self.interest_rate / 100 / 12
         n = self.term * 12
-        monthly_payment = self.loan_amount * rate * (1 + rate) ** n / ((1 + rate) ** n - 1)
-        return monthly_payment
+        payment = self.loan_amount * rate / (1 - (1 + rate) ** -n)
+        return payment
 
     def display_loan_details(self):
-        print(f"Loan Amount: {self.loan_amount}, Interest Rate: {self.interest_rate}%, Term: {self.term} years, Monthly Payment: {self.monthly_payment}")
-        self.pledge.display_pledge()
+        return (f"Loan Amount: {self.loan_amount}, Interest Rate: {self.interest_rate}, "
+                f"Term: {self.term} years, Monthly Payment: {self.monthly_payment:.2f}, "
+                f"Pledge: {self.pledge.display_pledge()}")

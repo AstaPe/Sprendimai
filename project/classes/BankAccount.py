@@ -1,7 +1,10 @@
+from project.classes.Loan import Loan
+
+
 class BankAccount:
-    def __init__(self, owner, initial_balance=0.0):
+    def __init__(self, owner):
         self.owner = owner
-        self.balance = initial_balance
+        self.balance = 0.0
         self.loans = []
 
     def deposit(self, amount):
@@ -10,17 +13,17 @@ class BankAccount:
     def withdraw(self, amount):
         if amount <= self.balance:
             self.balance -= amount
+            return True
         else:
-            print("Insufficient funds")
+            return False
 
     def display_balance(self):
-        print(f"Account Balance: {self.balance}")
+        return f"Balance: {self.balance:.2f}"
 
     def apply_for_loan(self, loan_amount, interest_rate, term, pledge):
         loan = Loan(loan_amount, interest_rate, term, pledge)
         self.loans.append(loan)
-        print("Loan applied successfully")
+        return loan
 
     def display_loans(self):
-        for loan in self.loans:
-            loan.display_loan_details()
+        return [loan.display_loan_details() for loan in self.loans]

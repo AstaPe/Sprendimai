@@ -4,4 +4,4 @@ class Pledge:
         self.value = value
 
     def display_pledge(self):
-        print(f"Pledge: {self.description}, Value: {self.value}")
+        return f"Pledge Description: {self.description}, Value: {self.value}"

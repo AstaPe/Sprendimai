@@ -5,4 +5,4 @@ class Owner:
         self.phone = phone
 
     def display_info(self):
-        print(f"Owner: {self.name}, Address: {self.address}, Phone: {self.phone}")
+        return f"Owner: {self.name}, Address: {self.address}, Phone: {self.phone}"
