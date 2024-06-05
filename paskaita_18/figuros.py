@@ -2,6 +2,17 @@ from paskaita_18.abstraktus import Shape
 import math
 
 
+class Apskritimas(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def plotas(self):
+        return math.pi * self.radius ** 2
+
+    def perimetras(self):
+        return 2 * math.pi * self.radius
+
+
 class Staciakampis(Shape):
     def __init__(self, ilgis, plotis):
         self.ilgis = ilgis
@@ -27,13 +38,3 @@ class Trikampis(Shape):
 
     def perimetras(self):
         return self.a + self.b + self.c
-
-    class Apskritimas(Shape):
-        def __init__(self, radius):
-            self.radius = radius
-
-        def plotas(self):
-            return math.pi * self.radius ** 2
-
-        def perimetras(self):
-            return 2 * math.pi * self.radius
