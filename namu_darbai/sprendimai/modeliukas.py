@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split, learning_curve
+from sklearn.model_selection import train_test_split, GridSearchCV, learning_curve
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.linear_model import LogisticRegression
@@ -56,7 +56,7 @@ if y.dtype != 'int' and y.dtype != 'category':
     y = LabelEncoder().fit_transform(y)
 
 # Split data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, stratify=y, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
 # Model training with various classifiers
 classification_models = {
@@ -97,16 +97,63 @@ best_model_name = model_names[best_index]
 best_model = classification_models[best_model_name]
 print(f"The best model is: {best_model_name} with an F1 Score of {f1_scores[best_index]:.2f}")
 
+# K-Nearest Neighbors Hyperparameter Tuning
+print("Tuning K-Nearest Neighbors...")
+param_grid_knn = {
+    'n_neighbors': range(1, 21),  # Test k values from 1 to 20
+    'weights': ['uniform', 'distance'],
+    'metric': ['euclidean', 'manhattan']  # Test different distance metrics
+}
+
+knn = KNeighborsClassifier()
+knn_grid_search = GridSearchCV(knn, param_grid_knn, cv=5, scoring='accuracy', n_jobs=-1)
+knn_grid_search.fit(X_train, y_train)
+
+best_knn_params = knn_grid_search.best_params_
+best_knn_score = knn_grid_search.best_score_
+print(f"Best KNN Parameters: {best_knn_params}")
+print(f"Best KNN Cross-Validation Accuracy: {best_knn_score:.2f}")
+
+# Evaluate the best KNN model on the test set
+best_knn_model = knn_grid_search.best_estimator_
+y_pred_knn = best_knn_model.predict(X_test)
+accuracy_knn = accuracy_score(y_test, y_pred_knn)
+print(f"KNN Test Accuracy: {accuracy_knn:.2f}")
+
+# Decision Tree Hyperparameter Tuning
+print("Tuning Decision Tree...")
+param_grid_dt = {
+    'max_depth': [None, 5, 10, 15, 20],  # Limit tree depth
+    'min_samples_split': [2, 5, 10],     # Minimum samples required to split
+    'min_samples_leaf': [1, 2, 4]         # Minimum samples required at a leaf node
+}
+
+dt = DecisionTreeClassifier(random_state=42)
+dt_grid_search = GridSearchCV(dt, param_grid_dt, cv=5, scoring='accuracy', n_jobs=-1)
+dt_grid_search.fit(X_train, y_train)
+
+best_dt_params = dt_grid_search.best_params_
+best_dt_score = dt_grid_search.best_score_
+print(f"Best Decision Tree Parameters: {best_dt_params}")
+print(f"Best Decision Tree Cross-Validation Accuracy: {best_dt_score:.2f}")
+
+# Evaluate the best Decision Tree model on the test set
+best_dt_model = dt_grid_search.best_estimator_
+y_pred_dt = best_dt_model.predict(X_test)
+accuracy_dt = accuracy_score(y_test, y_pred_dt)
+print(f"Decision Tree Test Accuracy: {accuracy_dt:.2f}")
+
 # Plot Feature Importance for the best model
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(12, 6))  # Adjusted figure size for better visibility
 if hasattr(best_model, "feature_importances_"):
     importances = best_model.feature_importances_
     indices = np.argsort(importances)[::-1]
 
     plt.title("Feature Importance")
     plt.bar(range(X.shape[1]), importances[indices], align="center")
-    plt.xticks(range(X.shape[1]), X.columns[indices], rotation=90)
+    plt.xticks(range(X.shape[1]), X.columns[indices], rotation=45, ha='right')  # Rotate and align ticks
     plt.xlim([-1, X.shape[1]])
+    plt.tight_layout()  # Adjust layout to fit labels
     plt.show()
 elif hasattr(best_model, "coef_"):
     importances = np.abs(best_model.coef_[0])
@@ -114,8 +161,9 @@ elif hasattr(best_model, "coef_"):
 
     plt.title("Feature Importance")
     plt.bar(range(X.shape[1]), importances[indices], align="center")
-    plt.xticks(range(X.shape[1]), X.columns[indices], rotation=90)
+    plt.xticks(range(X.shape[1]), X.columns[indices], rotation=45, ha='right')  # Rotate and align ticks
     plt.xlim([-1, X.shape[1]])
+    plt.tight_layout()  # Adjust layout to fit labels
     plt.show()
 else:
     print(f"Feature importance not available for {best_model_name}.")
@@ -140,7 +188,7 @@ for name, clf in classification_models.items():
 
     train_sizes, train_scores, test_scores = learning_curve(clf, X_train, y_train, cv=5,
                                                             scoring='accuracy', n_jobs=-1,
-                                                            train_sizes=np.linspace(0.2, 1.0, 10))
+                                                            train_sizes=np.linspace(0.1, 1.0, 10))
 
     train_scores_mean = np.mean(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -160,25 +208,11 @@ best_model.fit(X_train, y_train)
 y_pred = best_model.predict(X_test)
 
 # Calculate and plot the confusion matrix
-score = accuracy_score(y_test, y_pred)
 cm = confusion_matrix(y_test, y_pred)
-
-# Plot the confusion matrix
 plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-plt.xlabel('Predicted Values')
-plt.ylabel('Actual Values')
-plt.title(f'Confusion Matrix\nAccuracy Score: {score:.2f}')
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=label_encoder.inverse_transform(np.unique(y)), yticklabels=label_encoder.inverse_transform(np.unique(y)))
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
 plt.show()
 
-# Feature Importance for Random Forest specifically
-if best_model_name == "Random Forest":
-    plt.figure(figsize=(10, 6))
-    importances = best_model.feature_importances_
-    indices = np.argsort(importances)[::-1]
-
-    plt.title("Feature Importance - Random Forest")
-    plt.bar(range(X.shape[1]), importances[indices], align="center")
-    plt.xticks(range(X.shape[1]), X.columns[indices], rotation=90)
-    plt.xlim([-1, X.shape[1]])
-    plt.show()
